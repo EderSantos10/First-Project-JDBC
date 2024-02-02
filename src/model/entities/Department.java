@@ -10,7 +10,6 @@ public class Department implements Serializable {
 		private String name;
 		
 		
-		// Construtor padrão
 		public Department() {
 		}
 
