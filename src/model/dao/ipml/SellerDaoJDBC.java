@@ -93,23 +93,39 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Stub de método gerado automaticamente
-		
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement("DELETE FROM seller WHERE id = ? ");
+			
+			st.setInt(1, id);
+			
+			int rows = st.executeUpdate();
+			
+			if (rows == 0 ) {
+				throw new DbException("Non-existent seller ");
+			}
+		}
+		catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
 	public Seller findById(Integer id) {
-		PreparedStatement ps = null;
+		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			ps = conn.prepareStatement(
+			st = conn.prepareStatement(
 					"SELECT seller.*,department.nome as DepName "
 					+ "FROM seller INNER JOIN department "
 					+ "ON seller.DepartmentId = department.id "
 					+ "WHERE seller.Id = ?");
 			
-			ps.setInt(1, id);
-			rs = ps.executeQuery();
+			st.setInt(1, id);
+			rs = st.executeQuery();
 			if (rs.next()) {
 				Department dep = instantiateDepartment(rs);
 				
@@ -122,7 +138,7 @@ public class SellerDaoJDBC implements SellerDao {
 			throw new DbException(e.getMessage());
 		}
 		finally {
-			DB.closeStatement(ps);
+			DB.closeStatement(st);
 			DB.closeResultSet(rs);
 		}
 		
@@ -148,17 +164,17 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public List<Seller> findAll() {
-		PreparedStatement ps = null;
+		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			ps = conn.prepareStatement(
+			st = conn.prepareStatement(
 					"SELECT seller.*,department.nome as DepName "
 					+ "FROM seller INNER JOIN department "
 					+ "ON seller.DepartmentId = department.id "
 					+ "ORDER BY nome ");
 			
 			
-			rs = ps.executeQuery();
+			rs = st.executeQuery();
 			
 			List<Seller> list = new ArrayList<>();			
 			Map<Integer, Department> map = new HashMap<>();
@@ -181,26 +197,26 @@ public class SellerDaoJDBC implements SellerDao {
 			throw new DbException(e.getMessage());
 		}
 		finally {
-			DB.closeStatement(ps);
+			DB.closeStatement(st);
 			DB.closeResultSet(rs);
 		}
 	}
 
 	@Override
 	public List<Seller> findByDepartment(Department department) {
-		PreparedStatement ps = null;
+		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			ps = conn.prepareStatement(
+			st = conn.prepareStatement(
 					"SELECT seller.*,department.nome as DepName "
 					+ "FROM seller INNER JOIN department "
 					+ "ON seller.DepartmentId = department.id "
 					+ "WHERE DepartmentId = ? "
 					+ "ORDER BY nome ");
 			
-			ps.setInt(1, department.getId());
+			st.setInt(1, department.getId());
 			
-			rs = ps.executeQuery();
+			rs = st.executeQuery();
 			
 			List<Seller> list = new ArrayList<>();			
 			Map<Integer, Department> map = new HashMap<>();
@@ -223,7 +239,7 @@ public class SellerDaoJDBC implements SellerDao {
 			throw new DbException(e.getMessage());
 		}
 		finally {
-			DB.closeStatement(ps);
+			DB.closeStatement(st);
 			DB.closeResultSet(rs);
 		}
 	}
